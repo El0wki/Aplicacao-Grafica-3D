@@ -1,54 +1,107 @@
-# Aplicação Gráfica 3D com OpenGL e Docker
+# Aplicação Gráfica 3D com OpenGL
 
-Este é um projeto simples que demonstra a criação de uma cena 3D interativa utilizando C++ com as bibliotecas OpenGL e FreeGLUT. A aplicação é totalmente containerizada com Docker para garantir um ambiente de compilação e execução consistente, resolvendo problemas comuns de dependências em diferentes sistemas operacionais.
+Este projeto demonstra a criação de uma cena 3D interativa utilizando C++ com as bibliotecas OpenGL e FreeGLUT. O código foi estruturado de forma modular para separar responsabilidades e facilitar a manutenção.
+
+A execução pode ser feita de duas maneiras: compilando nativamente no Windows para máxima performance, ou utilizando Docker com WSLg para um ambiente containerizado e de alta performance.
 
 ## Funcionalidades
 
-- **Cena 3D:** Renderização de objetos primitivos (cubo, cone, esfera) para formar uma cena simples.
+- **Cena 3D:** Renderização de objetos primitivos (chão, cubo, cone, esfera).
+- **Estrutura Modular:** Código-fonte organizado em `core`, `controls`, `lightning` e `objects`.
 - **Textura Procedural:** O chão da cena utiliza uma textura quadriculada gerada em tempo de execução.
-- **Controle de Câmera FPS:** Controle de câmera em primeira pessoa (First-Person Shooter) com movimentação pelo teclado e rotação pelo mouse.
-- **Mira (Crosshair):** Uma mira fixa no centro da tela para auxiliar na navegação.
-- **Iluminação:** Sistema de iluminação básico com uma fonte de luz direcional (simulando o sol) e uma luz ambiente para preenchimento.
-- **Animação:** Animação simples de um objeto que pode ser iniciada e parada pelo usuário.
+- **Controle de Câmera FPS:** Controle de câmera em primeira pessoa com movimentação pelo teclado e rotação pelo mouse.
+- **Iluminação:** Sistema de iluminação com uma luz direcional (sol) e luz ambiente.
+- **Animação:** Animação de uma esfera que pode ser iniciada e parada pelo usuário.
 
-## Pré-requisitos
-
-Para compilar e executar este projeto, você precisará de:
-
-1.  **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**: Para construir e rodar o contêiner da aplicação.
-2.  **Um X Server para Windows**: Necessário para que a aplicação gráfica dentro do contêiner possa ser exibida no Windows. A opção recomendada é o **[VcXsrv](https://sourceforge.net/projects/vcxsrv/)**.
+---
 
 ## Como Executar
 
-Siga os passos abaixo para rodar a aplicação.
+Existem dois métodos principais para rodar a aplicação. O método nativo é mais simples se você já tem um ambiente de desenvolvimento C++, enquanto o método Docker garante um ambiente consistente em qualquer máquina com Windows 11.
 
-### 1. Configure o X Server (VcXsrv)
+### Método 1: Compilando Nativo no Windows (Máxima Performance)
 
-Antes de rodar o contêiner, o VcXsrv precisa estar em execução com a configuração correta.
+Este método oferece a melhor performance gráfica, pois executa o código diretamente no hardware.
 
-1.  Inicie o **XLaunch** a partir do seu Menu Iniciar.
-2.  Na primeira tela, selecione **"Multiple windows"** e clique em _Avançar_.
-3.  Na segunda tela, selecione **"Start no client"** e clique em _Avançar_.
-4.  Na terceira tela, **marque a caixa "Disable access control"**. Este é o passo mais importante.
-5.  Clique em _Avançar_ e depois em _Concluir_. Um ícone do VcXsrv deve aparecer na sua bandeja do sistema (ao lado do relógio).
+#### 1. Instale o Ambiente de Compilação (MSYS2)
 
-### 2. Construa a Imagem Docker
+1.  **Baixe e Instale o MSYS2:** Acesse [msys2.org](https://www.msys2.org/) e instale a ferramenta.
+2.  **Abra o terminal MSYS2 UCRT64** (importante usar esta versão, encontrada no Menu Iniciar) e atualize os pacotes:
+    ```bash
+    pacman -Syu
+    ```
+    Pode ser necessário fechar e reabrir o terminal para completar a atualização. Execute o comando novamente se solicitado.
+3.  **Instale as ferramentas de compilação e o FreeGLUT:**
+    ```bash
+    pacman -S mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-freeglut
+    ```
 
-Abra um terminal (PowerShell, CMD, etc.) na pasta raiz deste projeto e execute o seguinte comando para construir a imagem:
+#### 2. Compile e Execute o Projeto
 
-```bash
-docker build -t app-grafica .
-```
+1.  **Navegue até a pasta do projeto** no terminal MSYS2 UCRT64:
+    ```bash
+    # Exemplo de caminho, ajuste para o seu caso
+    cd /c/Users/rafae/Github/Classificadores/Aplicacao-Grafica-3D/src
+    ```
+2.  **Compile o código:**
+    ```bash
+    g++ main.cpp lightning/lights.cpp objects/objects.cpp controls/controls.cpp -o aplicacao.exe -Icore -Ilightning -Iobjects -Icontrols -lfreeglut -lopengl32 -lglu32
+    ```
+3.  **Execute a aplicação:**
+    ```bash
+    ./aplicacao.exe
+    ```
 
-### 3. Execute o Contêiner
+---
 
-Com o VcXsrv rodando e a imagem construída, execute o comando abaixo no mesmo terminal para iniciar a aplicação:
+### Método 2: Usando Docker com WSLg (Alta Performance e Containerizado)
 
-```bash
-docker run --rm -it -e DISPLAY=host.docker.internal:0.0 app-grafica
-```
+Este método usa a tecnologia WSLg do Windows 11 para rodar a aplicação gráfica dentro de um contêiner Docker com aceleração de hardware, garantindo um ambiente consistente e de alta performance.
 
-A janela da aplicação 3D deverá aparecer na sua tela.
+#### 1. Configuração do Ambiente (Passo Único)
+
+1.  **Instale o WSL e o Ubuntu:**
+
+    - Abra a **Microsoft Store**, procure por **"Ubuntu 22.04 LTS"** e instale.
+    - Abra o aplicativo Ubuntu pelo Menu Iniciar. Na primeira execução, ele pedirá para você criar um **nome de usuário** e uma **senha**. Guarde essas informações.
+
+2.  **Verifique a Aceleração Gráfica:**
+    - Abra o terminal do **Ubuntu** (pelo Menu Iniciar ou digitando `wsl` no PowerShell).
+    - Instale as ferramentas gráficas:
+      ```bash
+      sudo apt-get update
+      sudo apt-get install mesa-utils
+      ```
+    - Verifique se sua GPU está sendo reconhecida:
+      ```bash
+      glxinfo | grep "OpenGL renderer"
+      ```
+    - A saída deve mostrar o nome da sua placa de vídeo (ex: NVIDIA, AMD, Intel). Se mostrar, a aceleração está funcionando.
+
+#### 2. Compile e Execute com Docker
+
+1.  **Abra o terminal do Ubuntu** (digitando `wsl` no PowerShell ou abrindo o app Ubuntu).
+
+2.  **Navegue até a pasta raiz do projeto** (a que contém o `Dockerfile`):
+
+    ```bash
+    # Exemplo de caminho, ajuste para o seu caso
+    cd /mnt/c/Users/rafae/Github/Classificadores/Aplicacao-Grafica-3D
+    ```
+
+3.  **Construa a Imagem Docker:**
+
+    ```bash
+    docker build -t app-grafica .
+    ```
+
+4.  **Execute o Contêiner:**
+    ```bash
+    docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix app-grafica
+    ```
+    A janela da aplicação deve abrir, rodando de forma fluida.
+
+---
 
 ## Controles
 
@@ -61,5 +114,10 @@ A janela da aplicação 3D deverá aparecer na sua tela.
 
 ## Estrutura do Projeto
 
-- `main.cpp`: Contém todo o código-fonte da aplicação em C++/OpenGL. É responsável pela inicialização, renderização da cena, controle de câmera e gerenciamento de eventos de teclado e mouse.
-- `Dockerfile`: Arquivo de receita que define o ambiente da aplicação. Ele instrui o Docker a usar uma imagem base do Ubuntu, instalar o compilador C++ e as dependências do FreeGLUT/OpenGL, e finalmente compilar e preparar o `main.cpp` para execução.
+- `src/`: Contém todo o código-fonte da aplicação, dividido em módulos:
+  - `main.cpp`: Ponto de entrada da aplicação, responsável pelo loop principal e inicialização.
+  - `core/`: Define as estruturas de dados centrais, como o estado da cena (`SceneState`).
+  - `controls/`: Gerencia a entrada do usuário (teclado e mouse).
+  - `lightning/`: Configura a iluminação da cena.
+  - `objects/`: Responsável por desenhar os objetos 3D.
+- `Dockerfile`: Arquivo de receita para containerizar a aplicação com Docker, otimizado para WSLg.

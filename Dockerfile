@@ -9,17 +9,27 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     freeglut3-dev \
     libglu1-mesa-dev \
+    libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Definir o diretório de trabalho dentro do contêiner
+# 3. Configurar as variáveis de ambiente para o WSLg
+ENV DISPLAY=:0
+ENV LIBGL_ALWAYS_INDIRECT=0
+
+# 4. Definir o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-# 4. Copiar a pasta 'src' e seu conteúdo para o contêiner
+# 5. Copiar a pasta 'src' e seu conteúdo para o contêiner
 COPY src/ .
 
-# 5. Compilar o código com os novos caminhos
-#    -Ilightning: Adiciona a pasta 'lightning' aos caminhos de busca de includes
-RUN g++ main.cpp lightning/lights.cpp -Ilightning -o aplicacao -lGL -lGLU -lglut
+# 6. Compilar o código
+#    Removemos as referências ao diretório 'ui' que não existe
+RUN g++ main.cpp \
+    lightning/lights.cpp \
+    objects/objects.cpp \
+    controls/controls.cpp \
+    -Icore -Ilightning -Iobjects -Icontrols \
+    -o aplicacao -lGL -lGLU -lglut
 
-# 6. Definir o comando padrão para executar a aplicação
+# 7. Definir o comando padrão para executar a aplicação
 CMD ["./aplicacao"]

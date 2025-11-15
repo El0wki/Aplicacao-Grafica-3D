@@ -7,8 +7,23 @@ LightsManager::LightsManager() {
 void LightsManager::createDefaultLights() {
     lights.clear();
     LightSource sun;
-    sun.position[0] = 0.0f;  sun.position[1] = 3.0f; sun.position[2] = 0.0f; sun.position[3] = 1.0f; // Pontual
-    sun.color[0] = 1.0f;   sun.color[1] = 1.0f;   sun.color[2] = 1.0f;  sun.color[3] = 1.0f;
+    // Posição lateral (esquerda/acima/frente)
+    sun.position[0] = -3.0f;  // X: esquerda
+    sun.position[1] = 2.0f;   // Y: acima
+    sun.position[2] = 2.0f;   // Z: frente
+    sun.position[3] = 1.0f;   // luz pontual
+
+    // Cor intensa
+    sun.color[0] = 2.0f; sun.color[1] = 2.0f; sun.color[2] = 2.0f; sun.color[3] = 1.0f;
+
+    // Direção para o centro da cena (direita/baixo/trás)
+    sun.spotDirection[0] = 1.0f;  // X: para direita
+    sun.spotDirection[1] = -1.0f; // Y: para baixo
+    sun.spotDirection[2] = -1.0f; // Z: para trás
+
+    // Cone dramático
+    sun.spotCutoff = 20.0f;
+
     lights.push_back(sun);
 }
 

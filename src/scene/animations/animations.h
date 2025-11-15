@@ -7,6 +7,7 @@ class AnimationsManager {
 public:
     AnimationsManager(SceneState& state);
     void animarBola();
+    void animarPendulo();
 private:
     SceneState& sceneState;
 };

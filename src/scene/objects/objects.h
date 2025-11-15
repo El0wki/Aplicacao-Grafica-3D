@@ -14,6 +14,7 @@ public:
 	void desenharCubo();
 	void desenharCone();
 	void desenharBola();
+	void desenharPendulo();
 private:
 	SceneState& sceneState;
 	AnimationsManager* animationsManager;

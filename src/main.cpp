@@ -11,8 +11,8 @@
 
 // Instância global de Controls
 Controls* g_controls = nullptr;
-#include "scene/textures/textures.h" // Inclui o novo cabeçalho de texturas
-#include "scene/textures/textures.h" // Inclui o novo cabeçalho de texturas
+#include "scene/textures/textures.h" 
+#include "scene/textures/textures.h" 
 
 // Estado Global
 SceneState g_sceneState;
@@ -42,6 +42,14 @@ void setupLights() {
         glEnable(lightId);
         glLightfv(lightId, GL_POSITION, (*sceneLights)[i].position);
         glLightfv(lightId, GL_DIFFUSE, (*sceneLights)[i].color);
+
+                glLightf(lightId, GL_CONSTANT_ATTENUATION, 0.5f);   // Valor base
+        glLightf(lightId, GL_LINEAR_ATTENUATION, 0.1f);     // Atenuação linear
+        glLightf(lightId, GL_QUADRATIC_ATTENUATION, 0.05f); // Atenuação quadrática
+
+        // Se usar spotlight:
+        glLightfv(lightId, GL_SPOT_DIRECTION, (*sceneLights)[i].spotDirection);
+        glLightf(lightId, GL_SPOT_CUTOFF, (*sceneLights)[i].spotCutoff);
     }
 }
 
@@ -50,9 +58,8 @@ void init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_TEXTURE_2D);
-    
-    // Inicializa luzes e texturas
-    setupLights();
+
+    // Inicializa texturas
     if (g_texturesManager) {
         g_texturesManager->gerarTexturaChao();
         g_texturesManager->gerarTexturaTijolo();
@@ -70,6 +77,7 @@ void display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    // Aplica a câmera primeiro
     float yawRad = g_sceneState.camera.yaw * 3.14159f / 180.0f;
     float pitchRad = g_sceneState.camera.pitch * 3.14159f / 180.0f;
     float lx = cos(pitchRad) * sin(yawRad);
@@ -79,12 +87,16 @@ void display() {
               g_sceneState.camera.x + lx, g_sceneState.camera.y + ly, g_sceneState.camera.z + lz,
               0, 1, 0);
 
+    // Agora configura luzes (depois da câmera)
+    setupLights();
+
     // Desenha todos os objetos da cena
     if (g_objectsManager) {
         g_objectsManager->desenharChao();
         g_objectsManager->desenharCone();
         g_objectsManager->desenharCubo();
         g_objectsManager->desenharBola();
+        g_objectsManager->desenharPendulo();
         // g_objectsManager->desenharCaixaMadeira();
     }
 

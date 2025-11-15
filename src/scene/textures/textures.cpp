@@ -31,28 +31,27 @@ void TexturesManager::gerarTexturaTijolo() {
     unsigned char* data = new unsigned char[TAM * TAM * 3];
     const int LARGURA_TIJOLO = 16;
     const int ALTURA_TIJOLO = 8;
-
     for (int y = 0; y < TAM; ++y) {
         for (int x = 0; x < TAM; ++x) {
             int idx = (y * TAM + x) * 3;
+            // Calcula linha e coluna do tijolo
             int linha = y / ALTURA_TIJOLO;
             int coluna = x;
-            if (linha % 2 == 1) {
-                coluna += LARGURA_TIJOLO / 2; // Desloca tijolos em linhas ímpares
+            // Linhas ímpares deslocam meio tijolo
+            if (linha % 2 == 1) coluna += LARGURA_TIJOLO / 2;
+            // Rejunte: borda do tijolo
+            bool rejunte = (y % ALTURA_TIJOLO < 2) || (coluna % LARGURA_TIJOLO < 2);
+            if (rejunte) {
+                // Rejunte cinza claro
+                data[idx + 0] = 200;
+                data[idx + 1] = 200;
+                data[idx + 2] = 200;
+            } else {
+                // Tijolo vermelho
+                data[idx + 0] = 180 + (x % 8);
+                data[idx + 1] = 60 + (y % 8);
+                data[idx + 2] = 40;
             }
-
-            // Define a cor do rejunte
-            unsigned char r = 180, g = 180, b = 180;
-
-            // Se não for rejunte, define a cor do tijolo
-            if ((y % ALTURA_TIJOLO > 1) && (coluna % LARGURA_TIJOLO > 1)) {
-                r = 150 + (x % 10 - y % 10);
-                g = 70;
-                b = 50;
-            }
-            data[idx + 0] = r;
-            data[idx + 1] = g;
-            data[idx + 2] = b;
         }
     }
     glGenTextures(1, &sceneState.brickTextureID);

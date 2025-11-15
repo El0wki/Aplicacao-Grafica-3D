@@ -3,7 +3,7 @@
 
 #include <GL/glut.h>
 
-// --- Estruturas de Dados da Cena ---
+//Estruturas de Dados da Cena
 
 struct Camera {
     float x = 0.0f, y = 1.6f, z = 5.0f;
@@ -15,9 +15,21 @@ struct Ball {
     bool isAnimating = true;
 };
 
+struct Pendulo {
+    float x = -2.5f;
+    float z = 0.0f;
+    float rotation = 0.0f;
+    bool isAnimating = true;
+    float amplitude = 30.0f; // amplitude máxima em graus
+    float velocidadeAngular = 1.0f; // velocidade angular (rad/s)
+    float tempo = 0.0f; // tempo para animação
+    float comprimento = 2.0f; // comprimento do pêndulo
+    float cor[3] = {0.7f, 0.7f, 0.2f}; // cor RGB
+};
+
 struct Window {
     int width = 1280;
-    int height = 720; // Corrigido o valor da altura
+    int height = 720; 
     bool mouseWarped = false;
 };
 
@@ -34,6 +46,7 @@ struct LightSource {
 struct SceneState {
     Camera camera;
     Ball ball;
+    Pendulo pendulo;
     Window window;
 
     // IDs das texturas

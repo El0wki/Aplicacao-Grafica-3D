@@ -5,6 +5,12 @@
 
 Controls::Controls(SceneState& state) : sceneState(state) {}
 
+void Controls::toggleAllAnimations() {
+    bool newState = !(sceneState.ball.isAnimating || sceneState.pendulo.isAnimating);
+    sceneState.ball.isAnimating = newState;
+    sceneState.pendulo.isAnimating = newState;
+}
+
 void Controls::teclado(unsigned char key, int x, int y) {
     float speed = 0.2f;
     float yawRad = sceneState.camera.yaw * 3.14159f / 180.0f;
@@ -28,7 +34,7 @@ void Controls::teclado(unsigned char key, int x, int y) {
             break;
         case 'q': case 'Q': sceneState.camera.y += speed; break;
         case 'e': case 'E': sceneState.camera.y -= speed; break;
-        case ' ': sceneState.ball.isAnimating = !sceneState.ball.isAnimating; break;
+        case ' ': toggleAllAnimations(); break;
         case 27: exit(0); break;
     }
     glutPostRedisplay();

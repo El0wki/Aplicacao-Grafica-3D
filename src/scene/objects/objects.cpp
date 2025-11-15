@@ -1,12 +1,15 @@
+
+
 #include "objects.h"
 #include <GL/glut.h>
-#include "state.h" 
+#include "../animations/animations.h"
+#include "../textures/textures.h"
 
-extern SceneState g_sceneState;
+ObjectsManager::ObjectsManager(SceneState& state, AnimationsManager* animMgr, TexturesManager* texMgr)
+    : sceneState(state), animationsManager(animMgr), texturesManager(texMgr) {}
 
-// --- Desenhar chão ---
-void desenharChao() {
-    glBindTexture(GL_TEXTURE_2D, g_sceneState.floorTextureID);
+void ObjectsManager::desenharChao() {
+    glBindTexture(GL_TEXTURE_2D, sceneState.floorTextureID);
     glColor3f(1.0f, 1.0f, 1.0f);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 0); glVertex3f(-10, 0, -10);
@@ -17,8 +20,7 @@ void desenharChao() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-// --- Desenhar casa ---
-void desenharCubo() {
+void ObjectsManager::desenharCubo() {
     glColor3f(0.8f, 0.5f, 0.3f); // Marrom
     glPushMatrix();
     glTranslatef(0, 0.5f, 0);
@@ -26,8 +28,7 @@ void desenharCubo() {
     glPopMatrix();
 }
 
-// --- Desenhar cone ---
-void desenharCone() {
+void ObjectsManager::desenharCone() {
     glColor3f(0.6f, 0.2f, 0.2f); 
     glPushMatrix();
     glTranslatef(0.0f, 1.0f, 0.0f); 
@@ -36,12 +37,15 @@ void desenharCone() {
     glPopMatrix();
 }
 
-// --- Desenhar bola ---
-void desenharBola() {
+void ObjectsManager::desenharBola() {
+    if (animationsManager) {
+        animationsManager->animarBola();
+    }
+    // Se quiser aplicar textura específica, pode chamar aqui
     glColor3f(1.0f, 0.2f, 0.2f); // Vermelha
     glPushMatrix();
-    glTranslatef(g_sceneState.ball.x, 0.5f, g_sceneState.ball.z);
-    glRotatef(g_sceneState.ball.rotation, 0, 1, 0);
+    glTranslatef(sceneState.ball.x, 0.5f, sceneState.ball.z);
+    glRotatef(sceneState.ball.rotation, 0, 1, 0);
     glutSolidSphere(0.5f, 20, 20);
     glPopMatrix();
 }

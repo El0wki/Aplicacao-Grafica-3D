@@ -1,12 +1,10 @@
+
 #include "textures.h"
 #include <GL/glut.h>
-#include "state.h"
 
-// Acessa o estado global para armazenar os IDs das texturas
-extern SceneState g_sceneState;
+TexturesManager::TexturesManager(SceneState& state) : sceneState(state) {}
 
-// --- Gerar textura procedural (grama quadriculada) ---
-void gerarTexturaChao() {
+void TexturesManager::gerarTexturaChao() {
     const int TAM = 64; // 64x64 pixels
     unsigned char* data = new unsigned char[TAM * TAM * 3];
     for (int y = 0; y < TAM; ++y) {
@@ -18,8 +16,8 @@ void gerarTexturaChao() {
             data[idx + 2] = 0;
         }
     }
-    glGenTextures(1, &g_sceneState.floorTextureID);
-    glBindTexture(GL_TEXTURE_2D, g_sceneState.floorTextureID);
+    glGenTextures(1, &sceneState.floorTextureID);
+    glBindTexture(GL_TEXTURE_2D, sceneState.floorTextureID);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TAM, TAM, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -28,8 +26,7 @@ void gerarTexturaChao() {
     delete[] data;
 }
 
-// --- Gerar textura procedural (tijolos) ---
-void gerarTexturaTijolo() {
+void TexturesManager::gerarTexturaTijolo() {
     const int TAM = 64;
     unsigned char* data = new unsigned char[TAM * TAM * 3];
     const int LARGURA_TIJOLO = 16;
@@ -58,8 +55,8 @@ void gerarTexturaTijolo() {
             data[idx + 2] = b;
         }
     }
-    glGenTextures(1, &g_sceneState.brickTextureID);
-    glBindTexture(GL_TEXTURE_2D, g_sceneState.brickTextureID);
+    glGenTextures(1, &sceneState.brickTextureID);
+    glBindTexture(GL_TEXTURE_2D, sceneState.brickTextureID);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TAM, TAM, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

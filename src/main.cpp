@@ -5,30 +5,46 @@
 
 #include "state.h"
 #include "lightning/lights.h"
-#include "objects/objects.h"
 #include "controls/controls.h"
-#include "textures/textures.h" // Inclui o novo cabeçalho de texturas
+#include "scene/objects/objects.h"
+#include "scene/animations/animations.h"
+
+// Instância global de Controls
+Controls* g_controls = nullptr;
+#include "scene/textures/textures.h" // Inclui o novo cabeçalho de texturas
+#include "scene/textures/textures.h" // Inclui o novo cabeçalho de texturas
 
 // Estado Global
 SceneState g_sceneState;
-std::vector<LightSource> sceneLights;
+LightsManager* g_lightsManager = nullptr;
+const std::vector<LightSource>* sceneLights = nullptr;
+ObjectsManager* g_objectsManager = nullptr;
+TexturesManager* g_texturesManager = nullptr;
+AnimationsManager* g_animationsManager = nullptr;
 
-// A função gerarTexturaChao() foi removida daqui e movida para textures.cpp
+// Funções encaminhadoras para GLUT
+void tecladoForward(unsigned char key, int x, int y) {
+    if (g_controls) g_controls->teclado(key, x, y);
+}
+
+void mouseMoveForward(int x, int y) {
+    if (g_controls) g_controls->mouseMove(x, y);
+}
 
 void setupLights() {
     glEnable(GL_LIGHTING);
     float amb[] = {0.3f, 0.3f, 0.3f, 1.0f};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
-    for (size_t i = 0; i < sceneLights.size(); ++i) {
-        if (i >= 8) break; 
+    if (!sceneLights) return;
+    for (size_t i = 0; i < sceneLights->size(); ++i) {
+        if (i >= 8) break;
         GLenum lightId = GL_LIGHT0 + i;
         glEnable(lightId);
-        glLightfv(lightId, GL_POSITION, sceneLights[i].position);
-        glLightfv(lightId, GL_DIFFUSE, sceneLights[i].color);
+        glLightfv(lightId, GL_POSITION, (*sceneLights)[i].position);
+        glLightfv(lightId, GL_DIFFUSE, (*sceneLights)[i].color);
     }
 }
 
-// --- Init ---
 void init() {
     glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -36,11 +52,12 @@ void init() {
     glEnable(GL_TEXTURE_2D);
     
     // Inicializa luzes e texturas
-    sceneLights = createSceneLights(); 
     setupLights();
-    gerarTexturaChao();
-    gerarTexturaTijolo();
-    // gerarTexturaMadeira(); 
+    if (g_texturesManager) {
+        g_texturesManager->gerarTexturaChao();
+        g_texturesManager->gerarTexturaTijolo();
+        // g_texturesManager->gerarTexturaMadeira();
+    }
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -63,42 +80,47 @@ void display() {
               0, 1, 0);
 
     // Desenha todos os objetos da cena
-    desenharChao();
-    desenharCone();
-    desenharCubo();
-    desenharBola();
-    // desenharCaixaMadeira();
+    if (g_objectsManager) {
+        g_objectsManager->desenharChao();
+        g_objectsManager->desenharCone();
+        g_objectsManager->desenharCubo();
+        g_objectsManager->desenharBola();
+        // g_objectsManager->desenharCaixaMadeira();
+    }
 
     glutSwapBuffers();
 }
 
 // --- Animação ---
 void timer(int v) {
-    if (g_sceneState.ball.isAnimating) {
-        g_sceneState.ball.z += 0.03f;
-        g_sceneState.ball.rotation += 10.0f;
-        if (g_sceneState.ball.z > 2.0f) {
-            g_sceneState.ball.z = -2.0f;
-            g_sceneState.ball.rotation = 0;
-        }
-    }
+    // Animações e texturas são delegadas ao ObjectsManager
     glutTimerFunc(16, timer, 0);
     glutPostRedisplay();
 }
 
 // --- Main ---
 int main(int argc, char** argv) {
-    sceneLights = createSceneLights();
+    g_lightsManager = new LightsManager();
+    sceneLights = &g_lightsManager->getLights();
+    g_controls = new Controls(g_sceneState);
+    g_animationsManager = new AnimationsManager(g_sceneState);
+    g_texturesManager = new TexturesManager(g_sceneState);
+    g_objectsManager = new ObjectsManager(g_sceneState, g_animationsManager, g_texturesManager);
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(g_sceneState.window.width, g_sceneState.window.height);
     glutCreateWindow("Cena 3D");
     glutDisplayFunc(display);
-    glutKeyboardFunc(teclado);
-    glutPassiveMotionFunc(mouseMove);
+    glutKeyboardFunc(tecladoForward);
+    glutPassiveMotionFunc(mouseMoveForward);
     glutSetCursor(GLUT_CURSOR_NONE);  
     glutTimerFunc(0, timer, 0);
     init();
     glutMainLoop();
+    delete g_controls;
+    delete g_lightsManager;
+    delete g_objectsManager;
+    delete g_texturesManager;
+    delete g_animationsManager;
     return 0;
 }
